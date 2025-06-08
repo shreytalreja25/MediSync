@@ -53,8 +53,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center text-primary-blue dark:text-primary-yellow">Login to MediSync</h2>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+        <h2 className="text-2xl font-bold mb-6 text-center text-primary-blue">Login to MediSync</h2>
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             {error}
@@ -90,16 +90,16 @@ export default function LoginPage() {
         </form>
         <div className="my-4 flex items-center justify-center gap-2 text-sm text-text-secondary">
           <span>Don&apos;t have an account?</span>
-          <Link href="/signup" className="text-primary-green dark:text-primary-yellow hover:underline">Sign Up</Link>
+          <Link href="/signup" className="text-primary-green hover:underline">Sign Up</Link>
         </div>
         <div className="flex flex-col gap-2 mt-6">
-          <button className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 rounded-lg py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+          <button className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition">
             <span>🔵</span> Login with Google (placeholder)
           </button>
-          <button className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 rounded-lg py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+          <button className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition">
             <span>🟦</span> Login with Microsoft (placeholder)
           </button>
-          <button className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700 rounded-lg py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+          <button className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition">
             <span>🍏</span> Login with Apple (placeholder)
           </button>
         </div>

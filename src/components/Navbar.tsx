@@ -3,14 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useTheme } from 'next-themes'
-import ThemeToggle from '@/components/layout/ThemeToggle'
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
-  const { theme } = useTheme()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -82,25 +79,24 @@ export default function Navbar() {
               About
             </Link>
             <div className={`${isScrolled ? 'text-white' : 'text-[#8B7355]'}`}>
-              <ThemeToggle />
+              {/* ThemeToggle */}
             </div>
-            <Link
-              href="/login"
-              className={`px-4 py-2 rounded-full ${
-                isScrolled
-                  ? 'bg-white text-[#8B7355] hover:bg-white/90'
-                  : 'bg-[#8B7355] text-white hover:bg-[#A67B5B]'
-              } transition-colors duration-200`}
-            >
-              Login
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/login">
+                <button className="bg-[#8B7355] text-white px-6 py-2 rounded-full font-semibold shadow hover:bg-[#A67B5B] transition-colors">
+                  Login
+                </button>
+              </Link>
+              <Link href="/signup">
+                <button className="bg-[#8B7355] text-white px-6 py-2 rounded-full font-semibold shadow hover:bg-[#A67B5B] transition-colors">
+                  Sign Up
+                </button>
+              </Link>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-4">
-            <div className={`${isScrolled ? 'text-white' : 'text-[#8B7355]'}`}>
-              <ThemeToggle />
-            </div>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`p-2 rounded-md ${
