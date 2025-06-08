@@ -15,8 +15,9 @@ export default function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize Gemini AI
-  const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GOOGLE_API_KEY || "");
+  // Initialize Gemini AI with API key
+  const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+  const genAI = new GoogleGenerativeAI(API_KEY || "");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -37,7 +38,7 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      if (!process.env.NEXT_PUBLIC_GOOGLE_API_KEY) {
+      if (!API_KEY) {
         throw new Error('API key is not configured');
       }
 
