@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import ChatWidget from '@/components/ChatWidget'
 
 function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
@@ -94,14 +95,6 @@ export default function Home() {
           <Link href="/login" className="btn-primary text-lg">Login</Link>
           <Link href="/signup" className="bg-primary-blue text-white px-6 py-3 rounded-xl shadow hover:bg-primary-blue/90 text-lg transition">Sign Up</Link>
         </div>
-        {/* Optional: Minimal illustration */}
-        <div className="hidden md:block mt-8">
-          <svg width="320" height="120" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="160" cy="60" rx="150" ry="40" fill="#E3FCEC" />
-            <rect x="80" y="40" width="160" height="40" rx="20" fill="#E3F2FD" />
-            <circle cx="160" cy="60" r="18" fill="#FFFDE7" />
-          </svg>
-        </div>
       </section>
 
       {/* Features Section */}
@@ -167,6 +160,9 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Chat Widget */}
+      <ChatWidget />
     </div>
   )
 } 
