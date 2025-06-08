@@ -1,85 +1,223 @@
 'use client'
 
-import React, { useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import ChatWidget from '@/components/ChatWidget'
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+
+// Earthy color palette
+const colors = {
+  primary: '#8B7355',    // Warm brown
+  secondary: '#A67B5B',  // Light brown
+  accent: '#D2B48C',     // Tan
+  background: '#F5F5F0', // Off-white
+  text: '#4A4A4A',       // Dark gray
+  highlight: '#C4A484'   // Warm beige
+};
 
 export default function Home() {
-  const router = useRouter()
+  const [mounted, setMounted] = useState(false);
 
-  // Redirect if a simple flag indicating login is set
   useEffect(() => {
-    const loggedIn = typeof window !== 'undefined' && localStorage.getItem('loggedIn')
-    if (loggedIn) {
-      router.replace('/dashboard')
-    }
-  }, [router])
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
-    <div className="flex flex-col">
+    <main className="min-h-screen bg-[#F5F5F0]">
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-16">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-text-primary mb-4">Smarter Healthcare Starts Here</h1>
-        <p className="text-lg md:text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
-          AI-assisted scheduling, virtual consults, instant reports, and more. MediSync brings modern healthcare to your fingertips—anytime, anywhere.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Link href="/login" className="btn-primary text-lg">Login</Link>
-          <Link href="/signup" className="bg-primary-blue text-white px-6 py-3 rounded-xl shadow hover:bg-primary-blue/90 text-lg transition">Sign Up</Link>
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-[url('/pattern.png')] bg-repeat"></div>
         </div>
+
+        {/* Content */}
+        <div className="container mx-auto px-4 z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <h1 className="text-5xl md:text-7xl font-light text-[#4A4A4A] mb-6">
+              Welcome to{' '}
+              <span className="text-[#8B7355] font-medium">MediSync</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-[#666] mb-12 max-w-2xl mx-auto">
+              Your trusted partner in healthcare, bringing modern solutions with a personal touch.
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  href="/appointments"
+                  className="inline-block px-8 py-3 bg-[#8B7355] text-white rounded-full hover:bg-[#A67B5B] transition-colors duration-300"
+                >
+                  Book Appointment
+                </Link>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  href="/services"
+                  className="inline-block px-8 py-3 bg-transparent border-2 border-[#8B7355] text-[#8B7355] rounded-full hover:bg-[#8B7355] hover:text-white transition-colors duration-300"
+                >
+                  Our Services
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Decorative Elements */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 1 }}
+          className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#F5F5F0] to-transparent"
+        />
       </section>
 
       {/* Features Section */}
-      <section className="max-w-5xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card flex flex-col items-center text-center">
-          <span className="mb-2"><svg width="32" height="32" fill="none" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="3" fill="#2E7D32" fillOpacity="0.1"/><rect x="7" y="10" width="10" height="2" rx="1" fill="#2E7D32"/></svg></span>
-          <h3 className="font-semibold text-lg mb-1">Book Appointments</h3>
-          <p className="text-text-secondary text-sm">Schedule visits in seconds, anytime.</p>
-        </div>
-        <div className="card flex flex-col items-center text-center">
-          <span className="mb-2"><svg width="32" height="32" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="20" rx="4" fill="#1976D2" fillOpacity="0.1"/><rect x="8" y="8" width="8" height="2" rx="1" fill="#1976D2"/></svg></span>
-          <h3 className="font-semibold text-lg mb-1">Access Reports</h3>
-          <p className="text-text-secondary text-sm">All your health records, always available.</p>
-        </div>
-        <div className="card flex flex-col items-center text-center">
-          <span className="mb-2"><svg width="32" height="32" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#F9A825" fillOpacity="0.1"/><rect x="10" y="8" width="4" height="8" rx="2" fill="#F9A825"/></svg></span>
-          <h3 className="font-semibold text-lg mb-1">Virtual Consults</h3>
-          <p className="text-text-secondary text-sm">See doctors online, from anywhere.</p>
-        </div>
-        <div className="card flex flex-col items-center text-center">
-          <span className="mb-2"><svg width="32" height="32" fill="none" viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="8" rx="4" fill="#1976D2" fillOpacity="0.1"/><rect x="6" y="12" width="12" height="2" rx="1" fill="#2E7D32"/></svg></span>
-          <h3 className="font-semibold text-lg mb-1">Smart Alerts</h3>
-          <p className="text-text-secondary text-sm">Get reminders and health notifications.</p>
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-light text-[#4A4A4A] mb-4">
+              Why Choose MediSync?
+            </h2>
+            <p className="text-[#666] max-w-2xl mx-auto">
+              Experience healthcare reimagined with our innovative approach and personalized care.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "24/7 Care",
+                description: "Round-the-clock medical assistance and support whenever you need it.",
+                icon: "🕒"
+              },
+              {
+                title: "Expert Doctors",
+                description: "Access to highly qualified and experienced healthcare professionals.",
+                icon: "👨‍⚕️"
+              },
+              {
+                title: "Easy Booking",
+                description: "Simple and quick appointment scheduling at your convenience.",
+                icon: "📅"
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="p-8 rounded-lg bg-[#F5F5F0] hover:bg-[#E8E8E0] transition-colors duration-300"
+              >
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-medium text-[#4A4A4A] mb-2">{feature.title}</h3>
+                <p className="text-[#666]">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* How it Works Section */}
-      <section className="max-w-4xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-text-primary text-center mb-8">How it Works</h2>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center mb-2">
-              <span className="text-primary-green text-2xl font-bold">1</span>
-            </div>
-            <span className="font-medium">Sign Up</span>
-          </div>
-          <span className="hidden md:inline-block text-3xl text-primary-blue">→</span>
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-primary-blue/10 flex items-center justify-center mb-2">
-              <span className="text-primary-blue text-2xl font-bold">2</span>
-            </div>
-            <span className="font-medium">Book Appointment</span>
-          </div>
-          <span className="hidden md:inline-block text-3xl text-primary-blue">→</span>
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 rounded-full bg-primary-yellow/10 flex items-center justify-center mb-2">
-              <span className="text-primary-yellow text-2xl font-bold">3</span>
-            </div>
-            <span className="font-medium">Consult Online</span>
+      {/* Testimonials Section */}
+      <section className="py-20 bg-[#F5F5F0]">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-light text-[#4A4A4A] mb-4">
+              What Our Patients Say
+            </h2>
+            <p className="text-[#666] max-w-2xl mx-auto">
+              Hear from our satisfied patients about their experience with MediSync.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {[
+              {
+                quote: "MediSync has transformed my healthcare experience. The ease of booking appointments and the quality of care is exceptional.",
+                author: "Sarah Johnson",
+                role: "Patient"
+              },
+              {
+                quote: "The doctors are incredibly knowledgeable and caring. I feel confident in the care I receive.",
+                author: "Michael Chen",
+                role: "Patient"
+              }
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="p-8 bg-white rounded-lg shadow-sm"
+              >
+                <p className="text-[#666] italic mb-4">"{testimonial.quote}"</p>
+                <div>
+                  <p className="font-medium text-[#4A4A4A]">{testimonial.author}</p>
+                  <p className="text-sm text-[#8B7355]">{testimonial.role}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
-    </div>
-  )
+
+      {/* CTA Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-light text-[#4A4A4A] mb-6">
+              Ready to Experience Better Healthcare?
+            </h2>
+            <p className="text-[#666] mb-8 max-w-2xl mx-auto">
+              Join thousands of satisfied patients who trust MediSync for their healthcare needs.
+            </p>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link
+                href="/register"
+                className="inline-block px-8 py-3 bg-[#8B7355] text-white rounded-full hover:bg-[#A67B5B] transition-colors duration-300"
+              >
+                Get Started Today
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+    </main>
+  );
 } 

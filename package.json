@@ -12,6 +12,7 @@
     "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.1.1",
     "bcryptjs": "^3.0.2",
+    "framer-motion": "^12.16.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
     "next": "14.1.0",
