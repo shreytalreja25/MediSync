@@ -30,7 +30,17 @@ interface FormData {
 
 // Demo avatar URLs
 const USER_AVATAR = "https://api.dicebear.com/7.x/avataaars/svg?seed=User";
-const BOT_AVATAR = "https://api.dicebear.com/7.x/bottts/svg?seed=MediSync";
+const BotAvatar = () => (
+  <span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#8B7355] border border-[#8B7355]/30 mr-2" style={{ minWidth: 32 }}>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="10" r="9" fill="#8B7355" />
+      <rect x="5" y="8" width="10" height="6" rx="3" fill="white" />
+      <rect x="8.5" y="4" width="3" height="4" rx="1.5" fill="white" />
+      <circle cx="7.5" cy="11" r="1" fill="#8B7355" />
+      <circle cx="12.5" cy="11" r="1" fill="#8B7355" />
+    </svg>
+  </span>
+);
 
 export default function ChatWidget() {
   const router = useRouter();
@@ -408,12 +418,7 @@ export default function ChatWidget() {
               >
                 {/* Assistant avatar */}
                 {message.role !== 'user' && (
-                  <img
-                    src={BOT_AVATAR}
-                    alt="Bot Avatar"
-                    className="w-8 h-8 rounded-full mr-2 border border-[#8B7355]/30 bg-white"
-                    style={{ minWidth: 32 }}
-                  />
+                  <BotAvatar />
                 )}
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
