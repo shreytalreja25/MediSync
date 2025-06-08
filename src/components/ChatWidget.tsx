@@ -94,7 +94,29 @@ export default function ChatWidget() {
 
   const handleFormSubmit = (formType: string) => {
     let response: Message;
-    
+    let userMessage: Message | null = null;
+
+    // Summarize form data for user message
+    if (formType === 'appointment') {
+      userMessage = {
+        role: 'user',
+        content: `Appointment requested for ${formData.preferredDate} at ${formData.preferredTime} by ${formData.name}`,
+        type: 'text'
+      };
+    } else if (formType === 'health') {
+      userMessage = {
+        role: 'user',
+        content: `Health info: Name: ${formData.name}, Age: ${formData.age}, Symptoms: ${formData.symptoms}`,
+        type: 'text'
+      };
+    } else if (formType === 'location') {
+      userMessage = {
+        role: 'user',
+        content: `Location provided: ${formData.location}`,
+        type: 'text'
+      };
+    }
+
     switch (formType) {
       case 'appointment':
         response = {
@@ -122,7 +144,9 @@ export default function ChatWidget() {
         };
     }
 
-    const newMessages = [...messages, response];
+    let newMessages = [...messages];
+    if (userMessage) newMessages = [...newMessages, userMessage];
+    newMessages = [...newMessages, response];
     setMessages(newMessages);
     updateSession(newMessages);
     setCurrentForm(null);
@@ -131,6 +155,18 @@ export default function ChatWidget() {
 
   const handleQuickReply = async (action: QuickReply['action']) => {
     let response: Message;
+    let userMessage: Message | null = null;
+
+    // Find the quick reply text for the action
+    const lastAssistant = messages.slice().reverse().find(m => m.role === 'assistant' && m.quickReplies);
+    const quickReplyText = lastAssistant?.quickReplies?.find(q => q.action === action)?.text;
+    if (quickReplyText) {
+      userMessage = {
+        role: 'user',
+        content: quickReplyText,
+        type: 'text'
+      };
+    }
 
     switch (action) {
       case 'book_appointment':
@@ -184,7 +220,9 @@ export default function ChatWidget() {
         };
     }
 
-    const newMessages = [...messages, response];
+    let newMessages = [...messages];
+    if (userMessage) newMessages = [...newMessages, userMessage];
+    newMessages = [...newMessages, response];
     setMessages(newMessages);
     updateSession(newMessages);
   };
