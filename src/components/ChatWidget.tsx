@@ -2,22 +2,87 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Message, QuickReply, SessionData } from '@/types/chat';
+import { useRouter } from 'next/navigation';
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+const WELCOME_MESSAGE: Message = {
+  role: 'assistant',
+  content: "Hi! I'm MediSync Digital Assistant. How can I help you today?",
+  type: 'quick_reply',
+  quickReplies: [
+    { text: "Book an Appointment", action: "book_appointment" },
+    { text: "Find Nearby Hospitals", action: "find_hospitals" },
+    { text: "Fill Health Form", action: "fill_form" },
+    { text: "General Query", action: "general_query" }
+  ]
+};
+
+interface FormData {
+  name?: string;
+  age?: string;
+  symptoms?: string;
+  preferredDate?: string;
+  preferredTime?: string;
+  location?: string;
 }
 
 export default function ChatWidget() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [currentForm, setCurrentForm] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const sessionTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Initialize Gemini AI with API key
   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
   const genAI = new GoogleGenerativeAI(API_KEY || "");
+
+  // Initialize session
+  useEffect(() => {
+    const savedSession = localStorage.getItem('chatSession');
+    if (savedSession) {
+      const session: SessionData = JSON.parse(savedSession);
+      if (Date.now() - session.lastActive < SESSION_TIMEOUT) {
+        setMessages(session.messages);
+      } else {
+        // Session expired, start new session
+        startNewSession();
+      }
+    } else {
+      startNewSession();
+    }
+
+    return () => {
+      if (sessionTimeoutRef.current) {
+        clearTimeout(sessionTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const startNewSession = () => {
+    const newSession: SessionData = {
+      sessionId: Date.now().toString(),
+      lastActive: Date.now(),
+      messages: [WELCOME_MESSAGE]
+    };
+    setMessages([WELCOME_MESSAGE]);
+    localStorage.setItem('chatSession', JSON.stringify(newSession));
+  };
+
+  const updateSession = (newMessages: Message[]) => {
+    const session: SessionData = {
+      sessionId: Date.now().toString(),
+      lastActive: Date.now(),
+      messages: newMessages
+    };
+    localStorage.setItem('chatSession', JSON.stringify(session));
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,13 +92,115 @@ export default function ChatWidget() {
     scrollToBottom();
   }, [messages]);
 
+  const handleFormSubmit = (formType: string) => {
+    let response: Message;
+    
+    switch (formType) {
+      case 'appointment':
+        response = {
+          role: 'assistant',
+          content: `Great! I've scheduled your appointment for ${formData.preferredDate} at ${formData.preferredTime}. You'll receive a confirmation shortly.`,
+          type: 'text'
+        };
+        break;
+      case 'health':
+        response = {
+          role: 'assistant',
+          content: `Thank you for providing your health information. Based on your symptoms (${formData.symptoms}), I recommend scheduling a consultation. Would you like to book an appointment?`,
+          type: 'quick_reply',
+          quickReplies: [
+            { text: "Yes, Book Appointment", action: "book_appointment" },
+            { text: "No, Thanks", action: "general_query" }
+          ]
+        };
+        break;
+      default:
+        response = {
+          role: 'assistant',
+          content: "Form submitted successfully!",
+          type: 'text'
+        };
+    }
+
+    const newMessages = [...messages, response];
+    setMessages(newMessages);
+    updateSession(newMessages);
+    setCurrentForm(null);
+    setFormData({});
+  };
+
+  const handleQuickReply = async (action: QuickReply['action']) => {
+    let response: Message;
+
+    switch (action) {
+      case 'book_appointment':
+        setCurrentForm('appointment');
+        response = {
+          role: 'assistant',
+          content: "Let's schedule your appointment. Please provide the following information:",
+          type: 'form',
+          formFields: [
+            { name: 'name', label: 'Your Name', type: 'text' },
+            { name: 'preferredDate', label: 'Preferred Date', type: 'date' },
+            { name: 'preferredTime', label: 'Preferred Time', type: 'time' }
+          ]
+        };
+        break;
+      case 'find_hospitals':
+        response = {
+          role: 'assistant',
+          content: "Please share your location to find nearby hospitals.",
+          type: 'form',
+          formFields: [
+            { name: 'location', label: 'Your Location', type: 'text' }
+          ]
+        };
+        break;
+      case 'fill_form':
+        setCurrentForm('health');
+        response = {
+          role: 'assistant',
+          content: "Please fill out your health information:",
+          type: 'form',
+          formFields: [
+            { name: 'name', label: 'Your Name', type: 'text' },
+            { name: 'age', label: 'Your Age', type: 'number' },
+            { name: 'symptoms', label: 'Describe your symptoms', type: 'textarea' }
+          ]
+        };
+        break;
+      case 'general_query':
+        response = {
+          role: 'assistant',
+          content: "Please type your question, and I'll help you with it.",
+          type: 'text'
+        };
+        break;
+      default:
+        response = {
+          role: 'assistant',
+          content: "I'm not sure how to help with that. Could you please rephrase?",
+          type: 'text'
+        };
+    }
+
+    const newMessages = [...messages, response];
+    setMessages(newMessages);
+    updateSession(newMessages);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
     // Add user message
-    const userMessage: Message = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage: Message = { 
+      role: 'user', 
+      content: input,
+      type: 'text'
+    };
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput('');
     setIsLoading(true);
 
@@ -51,19 +218,70 @@ export default function ChatWidget() {
       const assistantMessage: Message = {
         role: 'assistant',
         content: text,
+        type: 'text'
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      
+      const updatedMessages = [...newMessages, assistantMessage];
+      setMessages(updatedMessages);
+      updateSession(updatedMessages);
     } catch (error) {
       console.error('Error:', error);
-      // Add error message with more specific information
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'I apologize, but I encountered an error. Please make sure the API key is properly configured in your .env.local file.',
+        content: 'I apologize, but I encountered an error. Please try again.',
+        type: 'text'
       };
-      setMessages(prev => [...prev, errorMessage]);
+      const updatedMessages = [...newMessages, errorMessage];
+      setMessages(updatedMessages);
+      updateSession(updatedMessages);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderForm = (message: Message) => {
+    if (message.type !== 'form' || !message.formFields) return null;
+
+    return (
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleFormSubmit(currentForm || '');
+        }}
+        className="mt-3 space-y-3"
+      >
+        {message.formFields.map((field, idx) => (
+          <div key={idx} className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {field.label}
+            </label>
+            {field.type === 'textarea' ? (
+              <textarea
+                value={formData[field.name as keyof FormData] || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue dark:bg-gray-700 dark:text-white"
+                rows={3}
+                required
+              />
+            ) : (
+              <input
+                type={field.type}
+                value={formData[field.name as keyof FormData] || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue dark:bg-gray-700 dark:text-white"
+                required
+              />
+            )}
+          </div>
+        ))}
+        <button
+          type="submit"
+          className="w-full px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue/90 transition-colors"
+        >
+          Submit
+        </button>
+      </form>
+    );
   };
 
   return (
@@ -135,6 +353,20 @@ export default function ChatWidget() {
                   }`}
                 >
                   {message.content}
+                  {message.type === 'quick_reply' && message.quickReplies && (
+                    <div className="mt-3 space-y-2">
+                      {message.quickReplies.map((reply, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleQuickReply(reply.action)}
+                          className="block w-full text-left px-3 py-2 bg-white dark:bg-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors"
+                        >
+                          {reply.text}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {renderForm(message)}
                 </div>
               </div>
             ))}
