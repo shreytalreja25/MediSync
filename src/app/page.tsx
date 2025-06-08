@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 function ThemeToggle() {
+  const [mounted, setMounted] = useState(false)
   const [dark, setDark] = useState(false)
 
   // Set initial theme on mount
   useEffect(() => {
+    setMounted(true)
     const saved = localStorage.getItem('theme')
     if (saved === 'dark') {
       setDark(true)
@@ -19,9 +21,11 @@ function ThemeToggle() {
     } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setDark(true)
       document.documentElement.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
     } else {
       setDark(false)
       document.documentElement.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
     }
   }, [])
 
@@ -36,6 +40,11 @@ function ThemeToggle() {
       localStorage.setItem('theme', 'dark')
       setDark(true)
     }
+  }
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return null
   }
 
   return (
