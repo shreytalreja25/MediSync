@@ -1,64 +1,9 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ChatWidget from '@/components/ChatWidget'
-
-function ThemeToggle() {
-  const [mounted, setMounted] = useState(false)
-  const [dark, setDark] = useState(false)
-
-  // Set initial theme on mount
-  useEffect(() => {
-    setMounted(true)
-    const saved = localStorage.getItem('theme')
-    if (saved === 'dark') {
-      setDark(true)
-      document.documentElement.classList.add('dark')
-    } else if (saved === 'light') {
-      setDark(false)
-      document.documentElement.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDark(true)
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      setDark(false)
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
-  }, [])
-
-  // Toggle theme on click
-  const toggle = () => {
-    if (dark) {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-      setDark(false)
-    } else {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-      setDark(true)
-    }
-  }
-
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return null
-  }
-
-  return (
-    <button
-      aria-label="Toggle dark mode"
-      onClick={toggle}
-      className="text-2xl px-2 focus:outline-none hover:scale-110 transition-transform"
-      title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-    >
-      {dark ? '🌙' : '☀️'}
-    </button>
-  )
-}
 
 export default function Home() {
   const router = useRouter()
@@ -72,19 +17,7 @@ export default function Home() {
   }, [router])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-yellow-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-2xl font-bold text-primary-blue dark:text-primary-yellow tracking-tight">MediSync</span>
-          <nav className="flex items-center space-x-4">
-            <ThemeToggle />
-            <Link href="/login" className="font-medium text-primary-green dark:text-primary-yellow hover:underline">Login</Link>
-            <Link href="/signup" className="font-medium text-white bg-primary-green dark:bg-primary-yellow dark:text-gray-900 px-4 py-2 rounded-xl shadow hover:bg-primary-green/90 dark:hover:bg-primary-yellow/90 transition">Sign Up</Link>
-          </nav>
-        </div>
-      </header>
-
+    <div className="flex flex-col">
       {/* Hero Section */}
       <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-16">
         <h1 className="text-4xl md:text-5xl font-extrabold text-text-primary mb-4">Smarter Healthcare Starts Here</h1>
@@ -147,22 +80,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-white/80 backdrop-blur border-t py-6 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between text-sm text-text-secondary">
-          <span>&copy; {new Date().getFullYear()} MediSync. All rights reserved.</span>
-          <div className="flex items-center gap-4 mt-2 md:mt-0">
-            <Link href="/about" className="hover:underline">About</Link>
-            <Link href="/contact" className="hover:underline">Contact</Link>
-            <a href="#" className="hover:underline">LinkedIn</a>
-            <a href="#" className="hover:underline">Twitter</a>
-          </div>
-        </div>
-      </footer>
-
-      {/* Chat Widget */}
-      <ChatWidget />
     </div>
   )
 } 
