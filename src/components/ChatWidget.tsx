@@ -12,7 +12,7 @@ const WELCOME_MESSAGE: Message = {
   content: "Hi! I'm MediSync Digital Assistant. How can I help you today?",
   type: 'quick_reply',
   quickReplies: [
-    { text: "Book an Appointment", action: "book_appointment" },
+    { text: "Book Appointment", action: "book_appointment" },
     { text: "Find Nearby Hospitals", action: "find_hospitals" },
     { text: "Fill Health Form", action: "fill_form" },
     { text: "General Query", action: "general_query" }
@@ -30,7 +30,17 @@ interface FormData {
 
 // Demo avatar URLs
 const USER_AVATAR = "https://api.dicebear.com/7.x/avataaars/svg?seed=User";
-const BOT_AVATAR = "https://api.dicebear.com/7.x/bottts/svg?seed=MediSync";
+const BotAvatar = () => (
+  <span className="w-8 h-8 flex items-center justify-center rounded-full bg-[#8B7355] border border-[#8B7355]/30 mr-2" style={{ minWidth: 32 }}>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="10" r="9" fill="#8B7355" />
+      <rect x="5" y="8" width="10" height="6" rx="3" fill="white" />
+      <rect x="8.5" y="4" width="3" height="4" rx="1.5" fill="white" />
+      <circle cx="7.5" cy="11" r="1" fill="#8B7355" />
+      <circle cx="12.5" cy="11" r="1" fill="#8B7355" />
+    </svg>
+  </span>
+);
 
 export default function ChatWidget() {
   const router = useRouter();
@@ -43,6 +53,9 @@ export default function ChatWidget() {
   const [menuOpen, setMenuOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sessionTimeoutRef = useRef<NodeJS.Timeout>();
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [surveyRating, setSurveyRating] = useState<number | null>(null);
+  const [surveySubmitted, setSurveySubmitted] = useState(false);
 
   // Initialize Gemini AI with API key
   const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
@@ -132,17 +145,34 @@ export default function ChatWidget() {
         response = {
           role: 'assistant',
           content: `Great! I've scheduled your appointment for ${formData.preferredDate} at ${formData.preferredTime}. You'll receive a confirmation shortly.`,
-          type: 'text'
+          type: 'quick_reply',
+          quickReplies: [
+            { text: "Book Another Appointment", action: "book_appointment" },
+            { text: "Main Menu", action: "main_menu" },
+            { text: "End Chat", action: "end_chat" }
+          ]
         };
+        setShowSurvey(true);
         break;
       case 'health':
         response = {
           role: 'assistant',
-          content: `Thank you for providing your health information. Based on your symptoms (${formData.symptoms}), I recommend scheduling a consultation. Would you like to book an appointment?`,
+          content: `Thank you for providing your health information. Would you like to book an appointment?`,
           type: 'quick_reply',
           quickReplies: [
             { text: "Yes, Book Appointment", action: "book_appointment" },
-            { text: "No, Thanks", action: "general_query" }
+            { text: "No, Thanks", action: "main_menu" }
+          ]
+        };
+        break;
+      case 'location':
+        response = {
+          role: 'assistant',
+          content: `Here are some hospitals near you: [Demo Hospital 1, Demo Hospital 2]. Would you like to book an appointment?`,
+          type: 'quick_reply',
+          quickReplies: [
+            { text: "Book Appointment", action: "book_appointment" },
+            { text: "Main Menu", action: "main_menu" }
           ]
         };
         break;
@@ -180,10 +210,27 @@ export default function ChatWidget() {
 
     switch (action) {
       case 'book_appointment':
+        response = {
+          role: 'assistant',
+          content: "What type of appointment would you like to book?",
+          type: 'quick_reply',
+          quickReplies: [
+            { text: "General Physician", action: "appointment_gp" },
+            { text: "Specialist", action: "appointment_specialist" },
+            { text: "Lab Test", action: "appointment_lab" },
+            { text: "Other", action: "appointment_other" },
+            { text: "Main Menu", action: "main_menu" }
+          ]
+        };
+        break;
+      case 'appointment_gp':
+      case 'appointment_specialist':
+      case 'appointment_lab':
+      case 'appointment_other':
         setCurrentForm('appointment');
         response = {
           role: 'assistant',
-          content: "Let's schedule your appointment. Please provide the following information:",
+          content: "Please provide your details to book an appointment:",
           type: 'form',
           formFields: [
             { name: 'name', label: 'Your Name', type: 'text' },
@@ -193,9 +240,10 @@ export default function ChatWidget() {
         };
         break;
       case 'find_hospitals':
+        setCurrentForm('location');
         response = {
           role: 'assistant',
-          content: "Please share your location to find nearby hospitals.",
+          content: "Please share your location to find nearby hospitals:",
           type: 'form',
           formFields: [
             { name: 'location', label: 'Your Location', type: 'text' }
@@ -214,6 +262,9 @@ export default function ChatWidget() {
             { name: 'symptoms', label: 'Describe your symptoms', type: 'textarea' }
           ]
         };
+        break;
+      case 'main_menu':
+        response = WELCOME_MESSAGE;
         break;
       case 'general_query':
         response = {
@@ -336,6 +387,31 @@ export default function ChatWidget() {
     setIsOpen(!isOpen);
   };
 
+  const renderSurvey = () => {
+    if (!showSurvey) return null;
+    return (
+      <div className="mt-4 p-4 bg-white border border-[#8B7355]/30 rounded-lg flex flex-col items-center">
+        <div className="text-[#8B7355] font-medium mb-2">How would you rate your experience with our chatbot?</div>
+        <div className="flex items-center gap-1 mb-2">
+          {[1,2,3,4,5].map(star => (
+            <button
+              key={star}
+              onClick={() => { setSurveyRating(star); setSurveySubmitted(true); setShowSurvey(false); }}
+              className={`text-2xl focus:outline-none ${surveyRating && star <= surveyRating ? 'text-yellow-400' : 'text-gray-300'}`}
+              aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+              disabled={surveySubmitted}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+        {surveySubmitted && (
+          <div className="text-green-600 font-medium mt-2">Thank you for your feedback!</div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {/* Chat Button */}
@@ -408,12 +484,7 @@ export default function ChatWidget() {
               >
                 {/* Assistant avatar */}
                 {message.role !== 'user' && (
-                  <img
-                    src={BOT_AVATAR}
-                    alt="Bot Avatar"
-                    className="w-8 h-8 rounded-full mr-2 border border-[#8B7355]/30 bg-white"
-                    style={{ minWidth: 32 }}
-                  />
+                  <BotAvatar />
                 )}
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
@@ -460,6 +531,7 @@ export default function ChatWidget() {
                 </div>
               </div>
             )}
+            {renderSurvey()}
           </div>
 
           {/* Input */}

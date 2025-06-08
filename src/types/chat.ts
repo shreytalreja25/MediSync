@@ -8,7 +8,7 @@ export interface Message {
 
 export interface QuickReply {
   text: string;
-  action: 'book_appointment' | 'find_hospitals' | 'fill_form' | 'general_query';
+  action: 'book_appointment' | 'find_hospitals' | 'fill_form' | 'general_query' | 'main_menu' | 'end_chat' | 'appointment_gp' | 'appointment_specialist' | 'appointment_lab' | 'appointment_other';
 }
 
 export interface FormField {
