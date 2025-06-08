@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 function ThemeToggle() {
   const [dark, setDark] = useState(false)
@@ -50,7 +51,16 @@ function ThemeToggle() {
 }
 
 export default function Home() {
-  // TODO: Add auth logic to redirect logged-in users to /dashboard
+  const router = useRouter()
+
+  // Redirect if a simple flag indicating login is set
+  useEffect(() => {
+    const loggedIn = typeof window !== 'undefined' && localStorage.getItem('loggedIn')
+    if (loggedIn) {
+      router.replace('/dashboard')
+    }
+  }, [router])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-yellow-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 flex flex-col">
       {/* Header */}
