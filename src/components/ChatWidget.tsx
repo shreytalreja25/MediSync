@@ -37,6 +37,10 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
+      if (!process.env.NEXT_PUBLIC_GOOGLE_API_KEY) {
+        throw new Error('API key is not configured');
+      }
+
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
       const result = await model.generateContent(input);
       const response = await result.response;
@@ -50,10 +54,10 @@ export default function ChatWidget() {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error:', error);
-      // Add error message
+      // Add error message with more specific information
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'I apologize, but I encountered an error. Please try again.',
+        content: 'I apologize, but I encountered an error. Please make sure the API key is properly configured in your .env.local file.',
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
