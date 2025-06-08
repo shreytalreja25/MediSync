@@ -27,7 +27,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#F5F5F0]">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[url('/pattern.png')] bg-repeat"></div>
