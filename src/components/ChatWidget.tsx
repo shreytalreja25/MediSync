@@ -28,6 +28,10 @@ interface FormData {
   location?: string;
 }
 
+// Demo avatar URLs
+const USER_AVATAR = "https://api.dicebear.com/7.x/avataaars/svg?seed=User";
+const BOT_AVATAR = "https://api.dicebear.com/7.x/bottts/svg?seed=MediSync";
+
 export default function ChatWidget() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -36,6 +40,7 @@ export default function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentForm, setCurrentForm] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({});
+  const [menuOpen, setMenuOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sessionTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -73,6 +78,11 @@ export default function ChatWidget() {
     };
     setMessages([WELCOME_MESSAGE]);
     localStorage.setItem('chatSession', JSON.stringify(newSession));
+  };
+
+  const handleRestartChat = () => {
+    startNewSession();
+    setMenuOpen(false);
   };
 
   const updateSession = (newMessages: Message[]) => {
@@ -349,17 +359,44 @@ export default function ChatWidget() {
       {isOpen && (
         <div className="absolute bottom-16 right-0 w-96 h-[600px] bg-[#F5F5F0] rounded-lg shadow-xl flex flex-col overflow-hidden border border-[#8B7355]/20">
           {/* Header */}
-          <div className="bg-[#8B7355] text-white p-4 flex justify-between items-center">
+          <div className="bg-[#8B7355] text-white p-4 flex justify-between items-center relative">
             <h3 className="font-medium">MediSync Assistant</h3>
-            <button
-              onClick={toggleChat}
-              className="text-white/80 hover:text-white transition-colors"
-              aria-label="Close chat"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Three Dots Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen((open) => !open)}
+                  className="text-white/80 hover:text-white p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-white/40"
+                  aria-label="Open menu"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                    <circle cx="19" cy="12" r="1.5" fill="currentColor" />
+                  </svg>
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white text-[#8B7355] rounded shadow-lg z-10 border border-[#8B7355]/20">
+                    <button
+                      onClick={handleRestartChat}
+                      className="w-full text-left px-4 py-2 hover:bg-[#F5F5F0] rounded-t transition-colors"
+                    >
+                      Restart Chat
+                    </button>
+                  </div>
+                )}
+              </div>
+              {/* Close Button */}
+              <button
+                onClick={toggleChat}
+                className="text-white/80 hover:text-white transition-colors ml-1"
+                aria-label="Close chat"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
@@ -367,8 +404,17 @@ export default function ChatWidget() {
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex items-end ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
+                {/* Assistant avatar */}
+                {message.role !== 'user' && (
+                  <img
+                    src={BOT_AVATAR}
+                    alt="Bot Avatar"
+                    className="w-8 h-8 rounded-full mr-2 border border-[#8B7355]/30 bg-white"
+                    style={{ minWidth: 32 }}
+                  />
+                )}
                 <div
                   className={`max-w-[80%] rounded-lg p-3 ${
                     message.role === 'user'
@@ -392,6 +438,15 @@ export default function ChatWidget() {
                   )}
                   {renderForm(message)}
                 </div>
+                {/* User avatar */}
+                {message.role === 'user' && (
+                  <img
+                    src={USER_AVATAR}
+                    alt="User Avatar"
+                    className="w-8 h-8 rounded-full ml-2 border border-[#8B7355]/30 bg-white"
+                    style={{ minWidth: 32 }}
+                  />
+                )}
               </div>
             ))}
             {isLoading && (
