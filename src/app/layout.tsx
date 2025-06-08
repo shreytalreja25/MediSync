@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-[#F5F5F0] dark:bg-gray-900 flex flex-col">
+        <div className="min-h-screen bg-[#F5F5F0] flex flex-col">
           <Navbar />
           <main className="flex-1">{children}</main>
           {/* Footer */}

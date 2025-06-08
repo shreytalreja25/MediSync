@@ -252,14 +252,14 @@ export default function ChatWidget() {
       >
         {message.formFields.map((field, idx) => (
           <div key={idx} className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-[#8B7355]">
               {field.label}
             </label>
             {field.type === 'textarea' ? (
               <textarea
                 value={formData[field.name as keyof FormData] || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue dark:bg-gray-700 dark:text-white"
+                className="w-full p-2 border border-[#8B7355]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B7355]/40 bg-white text-[#4A4A4A]"
                 rows={3}
                 required
               />
@@ -268,7 +268,7 @@ export default function ChatWidget() {
                 type={field.type}
                 value={formData[field.name as keyof FormData] || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue dark:bg-gray-700 dark:text-white"
+                className="w-full p-2 border border-[#8B7355]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B7355]/40 bg-white text-[#4A4A4A]"
                 required
               />
             )}
@@ -276,7 +276,7 @@ export default function ChatWidget() {
         ))}
         <button
           type="submit"
-          className="w-full px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue/90 transition-colors"
+          className="w-full px-4 py-2 bg-[#8B7355] text-white rounded-lg hover:bg-[#A67B5B] transition-colors"
         >
           Submit
         </button>
