@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [formError, setFormError] = useState('')
 
   useEffect(() => {
     const message = searchParams.get('message')
@@ -21,13 +22,26 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
+    setFormError('')
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    const data = {
-      email: formData.get('email'),
-      password: formData.get('password')
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
+    // Client-side validation
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      setFormError('Please enter a valid email address.')
+      setLoading(false)
+      return
     }
+    if (!password) {
+      setFormError('Please enter your password.')
+      setLoading(false)
+      return
+    }
+
+    const data = { email, password }
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -55,6 +69,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#F5F5F0] px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-[#8B7355]/20 flex flex-col items-center">
         <h2 className="text-3xl font-bold mb-6 text-center text-[#8B7355]">Login to MediSync</h2>
+        {formError && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded w-full">
+            {formError}
+          </div>
+        )}
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded w-full">
             {error}

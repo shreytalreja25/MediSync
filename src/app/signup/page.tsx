@@ -8,19 +8,43 @@ export default function SignupPage() {
   const router = useRouter()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [formError, setFormError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
+    setFormError('')
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      password: formData.get('password'),
-      role: formData.get('role')
+    const name = (formData.get('name') as string || '').trim()
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    const role = formData.get('role') as string
+
+    // Client-side validation
+    if (!name || name.length < 2) {
+      setFormError('Please enter your full name (at least 2 characters).')
+      setLoading(false)
+      return
     }
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      setFormError('Please enter a valid email address.')
+      setLoading(false)
+      return
+    }
+    if (!password || password.length < 6) {
+      setFormError('Password must be at least 6 characters.')
+      setLoading(false)
+      return
+    }
+    if (!role) {
+      setFormError('Please select your role.')
+      setLoading(false)
+      return
+    }
+
+    const data = { name, email, password, role }
 
     try {
       const res = await fetch('/api/auth/signup', {
@@ -48,9 +72,9 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#F5F5F0] px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-[#8B7355]/20 flex flex-col items-center">
         <h2 className="text-3xl font-bold mb-6 text-center text-[#8B7355]">Sign Up for MediSync</h2>
-        {error && (
+        {formError && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded w-full">
-            {error}
+            {formError}
           </div>
         )}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
