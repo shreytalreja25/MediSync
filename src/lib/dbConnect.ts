@@ -1,9 +1,7 @@
 import mongoose from 'mongoose'
 
-// Hardcoded MongoDB URI for debugging
-const MONGODB_URI = 'mongodb+srv://shreytalreja25:Shrey%409999@cluster0.7lbnxum.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-
-console.log('Using MongoDB URI:', MONGODB_URI)
+// Prefer environment variable for the connection string
+const MONGODB_URI = process.env.MONGODB_URI ?? ''
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable in .env.local')
@@ -17,13 +15,19 @@ if (!cached) {
 
 async function dbConnect() {
   if (cached.conn) return cached.conn
+
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
-    }).then((mongoose) => mongoose)
+    cached.promise = mongoose
+      .connect(MONGODB_URI, { bufferCommands: false })
+      .then((mongoose) => mongoose)
+      .catch((err) => {
+        cached.promise = null
+        throw err
+      })
   }
+
   cached.conn = await cached.promise
   return cached.conn
 }
 
-export default dbConnect 
+export default dbConnect
