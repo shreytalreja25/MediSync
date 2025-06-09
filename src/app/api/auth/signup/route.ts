@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import dbConnect from '@/lib/dbConnect'
-import User from '@/lib/models/User'
+import { connectToDatabase } from '@/lib/dbClient'
 
 export async function POST(req: NextRequest) {
   console.log('Signup API called');
   try {
-    await dbConnect();
-    console.log('Connected to MongoDB in signup API');
+    const db = await connectToDatabase();
+    const users = db.collection('users');
     const { name, email, password, role } = await req.json();
     console.log('Received data:', { name, email, role });
 
@@ -23,16 +22,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Password must be at least 6 characters.' }, { status: 400 });
     }
 
-    const existing = await User.findOne({ email });
+    const existing = await users.findOne({ email });
     if (existing) {
       return NextResponse.json({ error: 'Email already in use.' }, { status: 409 });
     }
 
     const hashed = await bcrypt.hash(password, 12);
-    const user = await User.create({ name, email, password: hashed, role });
-    console.log('User created:', user._id);
+    const result = await users.insertOne({ name, email, password: hashed, role, createdAt: new Date() });
+    console.log('User created:', result.insertedId);
 
-    return NextResponse.json({ success: true, user: { _id: user._id, name, email, role } });
+    return NextResponse.json({ success: true, user: { _id: result.insertedId, name, email, role } });
   } catch (err: any) {
     console.error('Signup API error:', err);
     return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });

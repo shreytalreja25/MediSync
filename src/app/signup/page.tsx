@@ -35,8 +35,8 @@ export default function SignupPage() {
         throw new Error(result.error || 'Something went wrong')
       }
 
-      // Redirect to login page on successful signup
-      router.push('/login?message=Account created successfully')
+      // Redirect to dashboard on successful signup
+      router.push('/dashboard')
     } catch (err: any) {
       setError(err.message)
     } finally {
